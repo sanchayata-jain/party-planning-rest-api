@@ -18,5 +18,6 @@ func NewDatabase(ctx context.Context) (*gorm.DB, error) {
 func Init(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&models.Table{},
+		&models.Guest{},
 	)
 }

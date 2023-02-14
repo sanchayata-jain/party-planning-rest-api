@@ -27,9 +27,7 @@ func (c Controller) ListTables() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		w.Write(tableInfo)
-
 	}
 }
 
@@ -53,7 +51,6 @@ func (c Controller) Create() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		w.WriteHeader(http.StatusOK)
 	}
 }

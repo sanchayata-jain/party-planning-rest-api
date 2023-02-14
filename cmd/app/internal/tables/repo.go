@@ -79,6 +79,21 @@ func (r Repository) CreateTable(ctx context.Context, table models.Table) error {
 	return nil
 }
 
+func GetTableCapacity(requestedTable int, db *gorm.DB) (int, error) {
+	//if requestedTableId found, get capacity and return, otherwise return error (table not found)
+	table := models.Table{}
+	tx := db.First(&table, "ID = ?", requestedTable)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+	// b, err := json.Marshal(table)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	return table.Capacity, nil
+}
+
 // func (r Repository) AddTable() error {
 // 	// r.db.Exec(`INSERT INTO %s ("capacity", "seats_empty")
 // 	// VALUES (%d, %d);`, tablename, newTable.Capacity, newTable.SeatsEmpty)

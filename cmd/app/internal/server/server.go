@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/config"
+	"github.com/getground/tech-tasks/backend/cmd/app/internal/guests"
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/tables"
 	"github.com/go-chi/chi"
 	"go.opencensus.io/plugin/ochttp"
@@ -38,13 +39,21 @@ func New() Server {
 
 	r := chi.NewRouter()
 
-	repo := tables.NewRepository(db)
-	service := tables.NewService(repo)
-	ctrl := tables.NewController(service)
+	tableRepo := tables.NewRepository(db)
+	tableService := tables.NewService(tableRepo)
+	tableCtrl := tables.NewController(tableService)
+
+	guestRepo := guests.NewRepository(db)
+	guestService := guests.NewService(guestRepo)
+	guestCtrl := guests.NewController(guestService)
 
 	r.MethodFunc(http.MethodGet, "/ping", handlerPing)
-	r.MethodFunc(http.MethodGet, "/get_tables", ctrl.ListTables())
-	r.MethodFunc(http.MethodPost, "/tables", ctrl.Create())
+	r.MethodFunc(http.MethodGet, "/get_tables", tableCtrl.ListTables())
+	r.MethodFunc(http.MethodPost, "/tables", tableCtrl.Create())
+
+	r.MethodFunc(http.MethodPost, "/guest_list/name", guestCtrl.AddGuestToGuestlist())
+	r.MethodFunc(http.MethodGet, "/guest_list", guestCtrl.GetGuestsOnGuestList())
+	r.MethodFunc(http.MethodPut, "/guests/name", guestCtrl.EditGuestsList())
 
 	return &server{
 		serv: &http.Server{
@@ -52,7 +61,6 @@ func New() Server {
 			Handler: r,
 		},
 	}
-
 }
 
 func handlerPing(w http.ResponseWriter, r *http.Request) {
