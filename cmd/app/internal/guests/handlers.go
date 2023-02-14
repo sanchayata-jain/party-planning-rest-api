@@ -101,3 +101,14 @@ func (c Controller) DeleteGuestFromList() http.HandlerFunc {
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+func (c Controller) GetArrivedGuests() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		arrivedGuests, err := c.service.GetArrivedGuests(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Write(arrivedGuests)
+		w.WriteHeader(http.StatusAccepted)
+	}
+}

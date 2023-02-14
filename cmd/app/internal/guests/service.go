@@ -16,6 +16,12 @@ type guestInfoToReturn struct {
 	AccompanyingGuests int    `json:"accompanying_guests"`
 }
 
+type arrivedGuestInfoToReturn struct {
+	Name               string    `json:"name"`
+	AccompanyingGuests int       `json:"accompanying_guest"`
+	TimeArrived        time.Time `json:"time_arrived"`
+}
+
 type Service struct {
 	repository Repository
 }
@@ -27,7 +33,7 @@ func NewService(repository Repository) Service {
 func (s Service) AddGuestToGuestList(ctx context.Context, guest models.Guest) error {
 	// we are just adding the guest to the guest list, the guest has not actually arrived to the party yet
 	// so we can leave TimeArrived empty
-	guest.LeftParty = false
+	// guest.LeftParty = false
 	// get capacity of table they wish to book
 	capacity, err := tables.GetTableCapacity(guest.Table, s.repository.db)
 	if err != nil {
@@ -87,7 +93,7 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 	if err != nil {
 		return err
 	}
-	if capacity < guest.AccompanyingGuests + 1 {
+	if capacity < guest.AccompanyingGuests+1 {
 		// table they have requested is not big enough so turn away the group
 		return errors.New("the table you have requested does not have enough space for your new group size. goodbye")
 	}
@@ -109,4 +115,35 @@ func (s Service) DeleteGuestFromList(name string) error {
 	}
 
 	return nil
-} 
+}
+
+func (s Service) GetArrivedGuests(ctx context.Context) ([]byte, error){
+	arrivedGuests, err := s.repository.GetArrivedGuests(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	guestInfo := []*models.Guest{}
+	err = json.Unmarshal(arrivedGuests, &guestInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	arrivedGuestList := []arrivedGuestInfoToReturn{}
+
+	for _, g := range guestInfo {
+		arrivedGuestList = append(arrivedGuestList, arrivedGuestInfoToReturn{
+			Name:               g.Name,
+			AccompanyingGuests: g.AccompanyingGuests,
+			TimeArrived:        g.TimeArrived,
+		})
+	}
+
+	b, err := json.Marshal(arrivedGuestList)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+
+}

@@ -57,7 +57,6 @@ func (r Repository) GetGuestsOnGuestList(ctx context.Context) ([]byte, error) {
 }
 
 func GetGuestTableID(ctx context.Context, db *gorm.DB, name string) (int, error) {
-	// SELECT guest FROM guests WHERE name = guest.name;
 	guest := &models.Guest{}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
@@ -80,15 +79,38 @@ func GetGuestTableID(ctx context.Context, db *gorm.DB, name string) (int, error)
 }
 
 func (r Repository) EditGuestList(arrivalTime time.Time, guest models.Guest) error {
-	// SELECT guest FROM Guests w
-	// query := "UPDATE guests SET time_arrived = '%s' WHERE name = '%s' "
-	// tx := r.db.Model(&models.Guest{}).Where("name = ?", name).Updates("time_arrived", arrivalTime)
 	tx := r.db.Model(&models.Guest{}).Select("time_arrived", "accompanying_guests").Where("name = ?", guest.Name).Updates(models.Guest{TimeArrived: arrivalTime, AccompanyingGuests: guest.AccompanyingGuests})
 	return tx.Error
 }
 
 func (r Repository) DeleteGuest(name string) error {
 	tx := r.db.Where("name = ?", name).Delete(&models.Guest{})
-	
+
 	return tx.Error
+}
+
+func (r Repository) GetArrivedGuests(ctx context.Context) ([]byte, error){
+	arrivedGuests := []*models.Guest{}
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		err := tx.Model(&models.Guest{}).
+			Find(&arrivedGuests).
+			Where("time_arrived <> ?", nil).
+			WithContext(ctx).
+			Error
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := json.Marshal(arrivedGuests)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }

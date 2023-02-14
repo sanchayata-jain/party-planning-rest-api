@@ -55,6 +55,7 @@ func New() Server {
 	r.MethodFunc(http.MethodGet, "/guest_list", guestCtrl.GetGuestsOnGuestList())
 	r.MethodFunc(http.MethodPut, "/guests/{name}", guestCtrl.EditGuestsList())
 	r.MethodFunc(http.MethodDelete, "/guests/{name}", guestCtrl.DeleteGuestFromList())
+	r.MethodFunc(http.MethodGet, "/guests", guestCtrl.GetArrivedGuests())
 
 	return &server{
 		serv: &http.Server{
