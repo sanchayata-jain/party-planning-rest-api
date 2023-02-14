@@ -2,6 +2,7 @@ package tables
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/models"
 )
@@ -25,10 +26,19 @@ func (s Service) GetTables(ctx context.Context) ([]byte, error) {
 
 func (s Service) CreateTable(ctx context.Context, table models.Table) error {
 	table.SeatsEmpty = table.Capacity
-	// table.ID = 1
 	err := s.repository.CreateTable(ctx, table)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (s Service) CountNumberOfEmptySeats() (string, error) {
+	emptySeats, err := s.repository.CountNumberOfEmptySeats()
+	if err != nil {
+		return "", nil
+	}
+	emptySeatsSum := strconv.Itoa(emptySeats)
+
+	return emptySeatsSum, nil
 }

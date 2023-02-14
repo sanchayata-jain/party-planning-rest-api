@@ -97,10 +97,15 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 		// table they have requested is not big enough so turn away the group
 		return errors.New("the table you have requested does not have enough space for your new group size. goodbye")
 	}
-	// okay so capacity is fine .. lets update party size on guest list and add arrival time
-	// csall repo
+	// okay so capacity is fine .. lets update party size on guest list, and add arrival time
+	// let's also update seats_empty in tables table
 	arrivalTime := time.Now()
 	err = s.repository.EditGuestList(arrivalTime, guest)
+	if err != nil {
+		return err
+	}
+	updatedEmptySeats := capacity - (guest.AccompanyingGuests + 1)
+	err = tables.EditEmptySeatsAfterGuestsArrive(s.repository.db, updatedEmptySeats, tableID)
 	if err != nil {
 		return err
 	}
@@ -108,8 +113,20 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 	return nil
 }
 
-func (s Service) DeleteGuestFromList(name string) error {
-	err := s.repository.DeleteGuest(name)
+func (s Service) DeleteGuestFromList(ctx context.Context, name string) error {
+	tableID, err := GetGuestTableID(ctx , s.repository.db, name)
+	if err != nil {
+		return err
+	}
+	capacity, err := tables.GetTableCapacity(tableID, s.repository.db)
+	if err != nil {
+		return err
+	}
+	err = tables.EditEmptySeatsAfterGuestsLeave(capacity, tableID, s.repository.db)
+	if err != nil {
+		return err
+	}
+	err = s.repository.DeleteGuest(name)
 	if err != nil {
 		return err
 	}
@@ -145,5 +162,4 @@ func (s Service) GetArrivedGuests(ctx context.Context) ([]byte, error){
 	}
 
 	return b, nil
-
 }

@@ -50,6 +50,7 @@ func New() Server {
 	r.MethodFunc(http.MethodGet, "/ping", handlerPing)
 	r.MethodFunc(http.MethodGet, "/get_tables", tableCtrl.ListTables())
 	r.MethodFunc(http.MethodPost, "/tables", tableCtrl.Create())
+	r.MethodFunc(http.MethodGet, "/seats_empty", tableCtrl.SumEmptySeats())
 
 	r.MethodFunc(http.MethodPost, "/guest_list/{name}", guestCtrl.AddGuestToGuestlist())
 	r.MethodFunc(http.MethodGet, "/guest_list", guestCtrl.GetGuestsOnGuestList())

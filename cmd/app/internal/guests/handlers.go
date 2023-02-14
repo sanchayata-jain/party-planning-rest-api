@@ -93,7 +93,7 @@ func (c Controller) EditGuestsList() http.HandlerFunc {
 func (c Controller) DeleteGuestFromList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := chi.URLParam(r, "name")
-		err := c.service.DeleteGuestFromList(name)
+		err := c.service.DeleteGuestFromList(r.Context(), name)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

@@ -46,25 +46,6 @@ func (r Repository) GetTables(ctx context.Context) ([]byte, error) {
 
 func (r Repository) CreateTable(ctx context.Context, table models.Table) error {
 	createTable := &models.Table{}
-	// err := r.db.Transaction(func(tx *gorm.DB) error {
-	// 	err := tx.Create(table).WithContext(ctx).Error
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	// return tx.First(createTable, "id = ?", table.ID).WithContext(ctx).Error
-	// 	return nil
-	// })
-	// if err != nil {
-	// 	return err
-	// }
-
-	// r.db.Raw("SELECT id, name, age FROM users WHERE name = ?", 3).Scan(&result)
-	// tx := r.db.Raw("INSERT INTO tables (capacity, seats_empty) VALUES (30, 30);")
-	// table := User{Name: "Jinzhu", Age: 18, Birthday: time.Now()}
-	// if tx.Error != nil {
-	// 	return tx.Error
-	// }
-
 	tx := r.db.Select("Capacity", "SeatsEmpty").Create(&table)
 	if tx.Error != nil {
 		return tx.Error
@@ -74,9 +55,30 @@ func (r Repository) CreateTable(ctx context.Context, table models.Table) error {
 		return err
 	}
 
-	// w.Write([]byte("New note created:\n"))
-	// w.Write(b)
 	return nil
+}
+
+func (r Repository) CountNumberOfEmptySeats() (int, error) {
+	var count int
+	tx := r.db.Model(&models.Table{}).Select("SUM(seats_empty)").Scan(&count)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+
+	return count, nil
+}
+
+func EditEmptySeatsAfterGuestsLeave(capacity int, tableID int, db *gorm.DB) error {
+	//using guests table number make empty seats equal capacity
+	tx := db.Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", capacity)
+
+	return tx.Error
+}
+
+func EditEmptySeatsAfterGuestsArrive(db *gorm.DB, emptySeats int, tableID int) error {
+	tx := db.Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", emptySeats)
+	
+	return tx.Error
 }
 
 func GetTableCapacity(requestedTable int, db *gorm.DB) (int, error) {
@@ -86,28 +88,6 @@ func GetTableCapacity(requestedTable int, db *gorm.DB) (int, error) {
 	if tx.Error != nil {
 		return 0, tx.Error
 	}
-	// b, err := json.Marshal(table)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	return table.Capacity, nil
 }
-
-// func (r Repository) AddTable() error {
-// 	// r.db.Exec(`INSERT INTO %s ("capacity", "seats_empty")
-// 	// VALUES (%d, %d);`, tablename, newTable.Capacity, newTable.SeatsEmpty)
-
-// 	// sqlStatement := "INSERT INTO tables (capacity, seats_empty) VALUES (5, 5);"
-// 	// _, err := r.db.Exec(sqlStatement)
-// 	// if err != nil {
-// 	// 	fmt.Println("error in the repo")
-// 	// 	return err
-// 	// }
-
-// 	r.db.
-// 	return nil
-// }
-
-// INSERT INTO table_name (column1, column2, column3, ...)
-// VALUES (value1, value2, value3, ...);
