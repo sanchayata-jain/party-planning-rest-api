@@ -87,7 +87,7 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 	if err != nil {
 		return err
 	}
-	if capacity < guest.AccompanyingGuests+1 {
+	if capacity < guest.AccompanyingGuests + 1 {
 		// table they have requested is not big enough so turn away the group
 		return errors.New("the table you have requested does not have enough space for your new group size. goodbye")
 	}
@@ -101,3 +101,12 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 
 	return nil
 }
+
+func (s Service) DeleteGuestFromList(name string) error {
+	err := s.repository.DeleteGuest(name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+} 

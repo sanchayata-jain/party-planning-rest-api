@@ -86,3 +86,9 @@ func (r Repository) EditGuestList(arrivalTime time.Time, guest models.Guest) err
 	tx := r.db.Model(&models.Guest{}).Select("time_arrived", "accompanying_guests").Where("name = ?", guest.Name).Updates(models.Guest{TimeArrived: arrivalTime, AccompanyingGuests: guest.AccompanyingGuests})
 	return tx.Error
 }
+
+func (r Repository) DeleteGuest(name string) error {
+	tx := r.db.Where("name = ?", name).Delete(&models.Guest{})
+	
+	return tx.Error
+}

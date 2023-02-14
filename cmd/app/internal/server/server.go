@@ -51,9 +51,10 @@ func New() Server {
 	r.MethodFunc(http.MethodGet, "/get_tables", tableCtrl.ListTables())
 	r.MethodFunc(http.MethodPost, "/tables", tableCtrl.Create())
 
-	r.MethodFunc(http.MethodPost, "/guest_list/name", guestCtrl.AddGuestToGuestlist())
+	r.MethodFunc(http.MethodPost, "/guest_list/{name}", guestCtrl.AddGuestToGuestlist())
 	r.MethodFunc(http.MethodGet, "/guest_list", guestCtrl.GetGuestsOnGuestList())
-	r.MethodFunc(http.MethodPut, "/guests/name", guestCtrl.EditGuestsList())
+	r.MethodFunc(http.MethodPut, "/guests/{name}", guestCtrl.EditGuestsList())
+	r.MethodFunc(http.MethodDelete, "/guests/{name}", guestCtrl.DeleteGuestFromList())
 
 	return &server{
 		serv: &http.Server{

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/models"
+	"github.com/go-chi/chi"
 )
 
 type Controller struct {
@@ -28,12 +29,15 @@ func (c Controller) AddGuestToGuestlist() http.HandlerFunc {
 			return
 		}
 
+		name := chi.URLParam(r, "name")
+
 		guest := models.Guest{}
 		err = json.Unmarshal(body, &guest)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		guest.Name = name
 
 		err = c.service.AddGuestToGuestList(r.Context(), guest)
 		if err != nil {
@@ -61,20 +65,24 @@ func (c Controller) EditGuestsList() http.HandlerFunc {
 		// we will ammend guest list if number of accompyaning guests+1 still fits in the capacity &
 		// we will update the time of arrival as well
 
-		// if too many people for table capacity, they get turned away and time of arrival doesn't get set 
+		// if too many people for table capacity, they get turned away and time of arrival doesn't get set
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		name := chi.URLParam(r, "name")
+
 		guest := models.Guest{}
 		err = json.Unmarshal(body, &guest)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		
+		guest.Name = name
+
 		err = c.service.EditGuestsList(r.Context(), guest)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -82,9 +90,14 @@ func (c Controller) EditGuestsList() http.HandlerFunc {
 	}
 }
 
-// func (c Controller) DeleteGuestFromGuestList() http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-
-// 	}
-// }
-
+func (c Controller) DeleteGuestFromList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name := chi.URLParam(r, "name")
+		err := c.service.DeleteGuestFromList(name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
