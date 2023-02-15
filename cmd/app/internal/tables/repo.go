@@ -77,7 +77,7 @@ func EditEmptySeatsAfterGuestsLeave(capacity int, tableID int, db *gorm.DB) erro
 
 func EditEmptySeatsAfterGuestsArrive(db *gorm.DB, emptySeats int, tableID int) error {
 	tx := db.Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", emptySeats)
-	
+
 	return tx.Error
 }
 

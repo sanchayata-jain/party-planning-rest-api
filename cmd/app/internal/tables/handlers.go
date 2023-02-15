@@ -2,7 +2,6 @@ package tables
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -28,6 +27,7 @@ func (c Controller) ListTables() http.HandlerFunc {
 			return
 		}
 		w.Write(tableInfo)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -56,12 +56,6 @@ func (c Controller) Create() http.HandlerFunc {
 	}
 }
 
-func (c Controller) HandlePing() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "pong\n")
-	}
-}
-
 func (c Controller) SumEmptySeats() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		numOfEmptySeats, err := c.service.CountNumberOfEmptySeats()
@@ -71,6 +65,5 @@ func (c Controller) SumEmptySeats() http.HandlerFunc {
 
 		w.Write([]byte(numOfEmptySeats))
 		w.WriteHeader(http.StatusOK)
-
 	}
 }
