@@ -33,6 +33,7 @@ func (c Controller) ListTables() http.HandlerFunc {
 
 func (c Controller) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
