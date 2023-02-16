@@ -77,22 +77,22 @@ func (r Repository) CountNumberOfEmptySeats() (int, error) {
 }
 
 func EditEmptySeatsAfterGuestsLeave(capacity int, tableID int, db *gorm.DB) error {
-	//using guests table number make empty seats equal capacity
-	tx := db.Debug().Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", capacity)
+	tx := db.Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", capacity)
 
 	return tx.Error
 }
 
 func EditEmptySeatsAfterGuestsArrive(db *gorm.DB, emptySeats int, tableID int) error {
-	tx := db.Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", emptySeats)
-
-	return tx.Error
+	err := db.Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", emptySeats).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetTableCapacity(requestedTable int, db *gorm.DB) (int, error) {
-	//if requestedTableId found, get capacity and return, otherwise return error (table not found)
 	table := models.Table{}
-	tx := db.First(&table, "ID = ?", requestedTable)
+	tx := db.Debug().First(&table, "ID = ?", requestedTable)
 	if tx.Error != nil {
 		return 0, tx.Error
 	}

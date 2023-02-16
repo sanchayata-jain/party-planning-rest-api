@@ -9,13 +9,14 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/getground/tech-tasks/backend/cmd/app/internal/guests"
-	"github.com/getground/tech-tasks/backend/cmd/app/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"github.com/getground/tech-tasks/backend/cmd/app/internal/guests"
+	"github.com/getground/tech-tasks/backend/cmd/app/internal/models"
 )
 
 type Suite struct {
