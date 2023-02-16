@@ -20,6 +20,9 @@ Stop docker container:
 docker compose down
 ```
 
+## ERD 
+![ERD diargam for this project](./get_ground_erd.png)
+
 ## Improvements that could be made
 For the guest table we could include an id as a primary key e.g. phone number or email address, rather than the guests name, this will allow for different people with the same name to be on the guest list. This should help make the api work for more realistic cases.
 
