@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 
-	// "io"
 	"net/http"
 
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/models"
@@ -39,6 +38,11 @@ func (c Controller) AddGuestToGuestlist() http.HandlerFunc {
 		}
 		guest.Name = name
 
+		if guest.AccompanyingGuests < 0 {
+			w.Write([]byte("You can't have negative accompanying guests"))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		responseName, err := c.service.AddGuestToGuestList(r.Context(), guest)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -51,23 +55,17 @@ func (c Controller) AddGuestToGuestlist() http.HandlerFunc {
 
 func (c Controller) GetGuestsOnGuestList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		guestsOnList, err := c.service.GetGuestsOnGuestList(r.Context())
+		guestsNamesOnList, err := c.service.GetGuestsOnGuestList(r.Context())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Write(guestsOnList)
+		w.Write(guestsNamesOnList)
 	}
 }
-
+// EditGuestList gets called when a guest wants to check into the party
 func (c Controller) EditGuestsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// this handler should get called when guests arrive
-		// we will ammend guest list if number of accompyaning guests+1 still fits in the capacity &
-		// we will update the time of arrival as well
-
-		// if too many people for table capacity, they get turned away and time of arrival doesn't get set
-
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -83,6 +81,12 @@ func (c Controller) EditGuestsList() http.HandlerFunc {
 			return
 		}
 		guest.Name = name
+
+		if guest.AccompanyingGuests < 0 {
+			w.Write([]byte("You can't have negative accompanying guests"))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		err = c.service.EditGuestsList(r.Context(), guest)
 		if err != nil {

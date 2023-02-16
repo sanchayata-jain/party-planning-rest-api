@@ -10,11 +10,11 @@ import (
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/tables"
 )
 
-type guestInfoToReturn struct {
-	Name               string `json:"name"`
-	Table              int    `json:"table"`
-	AccompanyingGuests int    `json:"accompanying_guests"`
-}
+// type guestInfoToReturn struct {
+// 	Name               string `json:"name"`
+// 	Table              int    `json:"table"`
+// 	AccompanyingGuests int    `json:"accompanying_guests"`
+// }
 
 type arrivedGuestInfoToReturn struct {
 	Name               string    `json:"name"`
@@ -41,7 +41,7 @@ func (s Service) AddGuestToGuestList(ctx context.Context, guest models.Guest) (s
 		return "", errors.New("the table you have requested does not have enough space for your group, try a different table")
 	}
 	//TODO: check if table is not already assinged using guest list
-
+	guest.Arrived = false
 	name, err := s.repository.AddGuestToGuestlist(ctx, guest)
 	if err != nil {
 		return "", err
@@ -58,14 +58,10 @@ func (s Service) GetGuestsOnGuestList(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	guestList := []guestInfoToReturn{}
+	var guestList []string
 
 	for _, g := range guestInfo {
-		guestList = append(guestList, guestInfoToReturn{
-			Name:               g.Name,
-			Table:              g.Table,
-			AccompanyingGuests: g.AccompanyingGuests,
-		})
+		guestList = append(guestList, g.Name)
 	}
 
 	b, err := json.Marshal(guestList)
@@ -94,6 +90,7 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 	}
 	// okay so capacity is fine .. lets update party size on guest list, and add arrival time
 	// let's also update seats_empty in tables table
+	guest.Arrived = true
 	arrivalTime := time.Now()
 	err = s.repository.EditGuestList(arrivalTime, guest)
 	if err != nil {
@@ -109,7 +106,7 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 }
 
 func (s Service) DeleteGuestFromList(ctx context.Context, name string) error {
-	tableID, err := GetGuestTableID(ctx , s.repository.db, name)
+	tableID, err := GetGuestTableID(ctx, s.repository.db, name)
 	if err != nil {
 		return err
 	}
@@ -129,7 +126,7 @@ func (s Service) DeleteGuestFromList(ctx context.Context, name string) error {
 	return nil
 }
 
-func (s Service) GetArrivedGuests(ctx context.Context) ([]byte, error){
+func (s Service) GetArrivedGuests(ctx context.Context) ([]byte, error) {
 	arrivedGuests, err := s.repository.GetArrivedGuests(ctx)
 	if err != nil {
 		return nil, err

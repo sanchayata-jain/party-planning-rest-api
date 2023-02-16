@@ -90,7 +90,7 @@ func (s *Suite) TestGetGuestTableID() {
 		`SELECT * FROM "guests"`)).
 		WillReturnRows(sqlmock.NewRows([]string{"Table"}).
 			AddRow(table))
-			
+
 	res, err := guests.GetGuestTableID(s.ctx, s.DB, name)
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), table, res)
@@ -101,12 +101,13 @@ func (s *Suite) TestAddGuestToGuestList() {
 		name               = "San"
 		table              = 1
 		accompanyingGuests = 4
+		arrived            = false
 	)
 
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(
-		`INSERT INTO "guests" ("name","table","accompanying_guests") VALUES ($1,$2,$3)`)).
-		WithArgs(name, table, accompanyingGuests).
+		`INSERT INTO "guests" ("name","table","accompanying_guests","arrived") VALUES ($1,$2,$3,$4)`)).
+		WithArgs(name, table, accompanyingGuests, arrived).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	s.mock.ExpectCommit()
 
@@ -114,6 +115,7 @@ func (s *Suite) TestAddGuestToGuestList() {
 	g.Name = name
 	g.Table = table
 	g.AccompanyingGuests = accompanyingGuests
+	g.Arrived = false
 	responseName, err := s.repository.AddGuestToGuestlist(s.ctx, g)
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), name, responseName)
@@ -124,18 +126,20 @@ func (s *Suite) TestEditGuestList() {
 		name               = "Jason"
 		timeArrived        = time.Now()
 		accompanyingGuests = 2
+		arrived            = true
 	)
 
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(
-		`UPDATE "guests" SET "accompanying_guests"=$1,"time_arrived"=$2 WHERE name = $3`)).
-		WithArgs(accompanyingGuests, timeArrived, name).
+		`UPDATE "guests" SET "accompanying_guests"=$1,"time_arrived"=$2,"arrived"=$3 WHERE name = $4`)).
+		WithArgs(accompanyingGuests, timeArrived, arrived, name).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	s.mock.ExpectCommit()
 
 	g := models.Guest{}
 	g.Name = name
 	g.AccompanyingGuests = accompanyingGuests
+	g.Arrived = true
 	err := s.repository.EditGuestList(timeArrived, g)
 	require.NoError(s.T(), err)
 }
@@ -162,7 +166,8 @@ func (s *Suite) TestGetArrivedGuests() {
 		timeArrived        = time.Date(2023, time.February, 16, 10, 9, 51, 595434000, time.UTC)
 	)
 
-	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "guests"`)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "guests" WHERE arrived = $1`)).
+		WithArgs(true).
 		WillReturnRows(sqlmock.NewRows([]string{"Name", "AccompanyingGuests", "TimeArrived"}).
 			AddRow(name, accompanyingGuests, timeArrived))
 

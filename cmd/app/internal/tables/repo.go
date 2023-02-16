@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 
-	// "net/http"
-
 	"gorm.io/gorm"
 
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/models"
@@ -59,7 +57,16 @@ func (r Repository) GetLastTableMade() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := json.Marshal(createTable)
+	type tableInfoToReturn struct {
+		ID       int `json:"id"`
+		Capacity int `json:"capacity"`
+	}
+	info := tableInfoToReturn {
+		ID: createTable.ID,
+		Capacity: createTable.Capacity,
+	}
+
+	b, err := json.Marshal(info)
 	if err != nil {
 		return nil, err
 	}
