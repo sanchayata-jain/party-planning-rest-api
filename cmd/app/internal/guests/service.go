@@ -30,29 +30,24 @@ func NewService(repository Repository) Service {
 	return Service{repository: repository}
 }
 
-func (s Service) AddGuestToGuestList(ctx context.Context, guest models.Guest) error {
-	// we are just adding the guest to the guest list, the guest has not actually arrived to the party yet
-	// so we can leave TimeArrived empty
-	// guest.LeftParty = false
-	// get capacity of table they wish to book
+func (s Service) AddGuestToGuestList(ctx context.Context, guest models.Guest) (string, error) {
 	capacity, err := tables.GetTableCapacity(guest.Table, s.repository.db)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if capacity < guest.AccompanyingGuests+1 {
 		// table they have requested is not big enough so turn away the group
-		return errors.New("the table you have requested does not have enough space for your group, try a different table")
+		return "", errors.New("the table you have requested does not have enough space for your group, try a different table")
 	}
 	//TODO: check if table is not already assinged using guest list
 
-	// if guest.AccompanyingGuests + 1 >= guest.Table
-	err = s.repository.AddGuestToGuestlist(ctx, guest)
+	name, err := s.repository.AddGuestToGuestlist(ctx, guest)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return name, nil
 }
 
 func (s Service) GetGuestsOnGuestList(ctx context.Context) ([]byte, error) {

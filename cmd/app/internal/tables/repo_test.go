@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"testing"
 
@@ -78,8 +77,6 @@ func (s *Suite) Test_repository_Get() {
 	realTable := []*models.Table{}
 	err = json.Unmarshal(res, &realTable)
 	require.NoError(s.T(), err)
-
-	fmt.Println(realTable[0])
 
 	assert.Equal(s.T(), models.Table{ID: id, Capacity: capacity, SeatsEmpty: seatsEmpty}, *realTable[0])
 }

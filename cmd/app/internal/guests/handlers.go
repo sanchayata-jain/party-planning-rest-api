@@ -39,12 +39,13 @@ func (c Controller) AddGuestToGuestlist() http.HandlerFunc {
 		}
 		guest.Name = name
 
-		err = c.service.AddGuestToGuestList(r.Context(), guest)
+		responseName, err := c.service.AddGuestToGuestList(r.Context(), guest)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
+		w.Write([]byte(responseName))
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -97,7 +98,7 @@ func (c Controller) DeleteGuestFromList() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	
+
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
