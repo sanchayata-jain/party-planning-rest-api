@@ -10,12 +10,6 @@ import (
 	"github.com/getground/tech-tasks/backend/cmd/app/internal/tables"
 )
 
-// type guestInfoToReturn struct {
-// 	Name               string `json:"name"`
-// 	Table              int    `json:"table"`
-// 	AccompanyingGuests int    `json:"accompanying_guests"`
-// }
-
 type arrivedGuestInfoToReturn struct {
 	Name               string    `json:"name"`
 	AccompanyingGuests int       `json:"accompanying_guest"`
@@ -73,13 +67,10 @@ func (s Service) GetGuestsOnGuestList(ctx context.Context) ([]byte, error) {
 }
 
 func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
-	//get name from path and then loop through the guest list to get tableID
 	tableID, err := GetGuestTableID(ctx, s.repository.db, guest.Name)
 	if err != nil {
-		//    http.Error(w, err.Error(), http.StatusBadRequest)
 		return err
 	}
-	// using tableID, loop through the tables, and see if the id matches any tables
 	capacity, err := tables.GetTableCapacity(tableID, s.repository.db)
 	if err != nil {
 		return err
@@ -104,10 +95,19 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 }
 
 func (s Service) DeleteGuestFromList(ctx context.Context, name string) error {
+	guest, err := s.repository.GetGuestFromName(name)
+	if err != nil {
+		return err
+	}
+	if !guest.Arrived {
+		return errors.New("cannot checkout a guest that has not checked in yet")
+	}
+	
 	tableID, err := GetGuestTableID(ctx, s.repository.db, name)
 	if err != nil {
 		return err
 	}
+	
 	capacity, err := tables.GetTableCapacity(tableID, s.repository.db)
 	if err != nil {
 		return err

@@ -47,10 +47,7 @@ func (r Repository) GetGuestsOnGuestList(ctx context.Context) ([]byte, error) {
 
 func GetGuestTableID(ctx context.Context, db *gorm.DB, name string) (int, error) {
 	guest := &models.Guest{}
-	err := db.Model(&models.Guest{}).
-		Find(&guest).
-		Where("name = ?", name).
-		Error
+	err := db.Where("name = ?", name).Find(&guest).Error
 	if err != nil {
 		return 0, err
 	}
@@ -59,14 +56,24 @@ func GetGuestTableID(ctx context.Context, db *gorm.DB, name string) (int, error)
 }
 
 func (r Repository) EditGuestList(arrivalTime time.Time, guest models.Guest) error {
-	tx := r.db.Debug().Model(&models.Guest{}).Select("time_arrived", "accompanying_guests", "arrived").Where("name = ?", guest.Name).Updates(models.Guest{TimeArrived: arrivalTime, AccompanyingGuests: guest.AccompanyingGuests, Arrived: guest.Arrived})
-	return tx.Error
+	err := r.db.Debug().Model(&models.Guest{}).Select("time_arrived", "accompanying_guests", "arrived").Where("name = ?", guest.Name).Updates(models.Guest{TimeArrived: arrivalTime, AccompanyingGuests: guest.AccompanyingGuests, Arrived: guest.Arrived}).Error	
+	return err
 }
 
 func (r Repository) DeleteGuest(name string) error {
-	tx := r.db.Where("name = ?", name).Delete(&models.Guest{})
+	err := r.db.Where("name = ?", name).Delete(&models.Guest{}).Error
 
-	return tx.Error
+	return err
+}
+
+func (r Repository) GetGuestFromName(name string) (*models.Guest, error) {
+	guest := &models.Guest{}
+	err := r.db.Where("name = ?", name).Find(&guest).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return guest, nil
 }
 
 func (r Repository) GetArrivedGuests(ctx context.Context) ([]byte, error) {

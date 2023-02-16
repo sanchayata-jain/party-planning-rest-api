@@ -124,6 +124,7 @@ func (s *Suite) TestAddGuestToGuestList() {
 func (s *Suite) TestEditGuestList() {
 	var (
 		name               = "Jason"
+		// wrongName          = "Basil"
 		timeArrived        = time.Now()
 		accompanyingGuests = 2
 		arrived            = true

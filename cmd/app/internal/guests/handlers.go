@@ -45,7 +45,7 @@ func (c Controller) AddGuestToGuestlist() http.HandlerFunc {
 		}
 		responseName, err := c.service.AddGuestToGuestList(r.Context(), guest)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.Write([]byte(responseName))
@@ -90,7 +90,7 @@ func (c Controller) EditGuestsList() http.HandlerFunc {
 
 		err = c.service.EditGuestsList(r.Context(), guest)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	}
 }
@@ -100,7 +100,7 @@ func (c Controller) DeleteGuestFromList() http.HandlerFunc {
 		name := chi.URLParam(r, "name")
 		err := c.service.DeleteGuestFromList(r.Context(), name)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
 		w.WriteHeader(http.StatusNoContent)
@@ -111,7 +111,7 @@ func (c Controller) GetArrivedGuests() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		arrivedGuests, err := c.service.GetArrivedGuests(r.Context())
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 		w.Write(arrivedGuests)
 		w.WriteHeader(http.StatusAccepted)
