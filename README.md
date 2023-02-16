@@ -1,7 +1,7 @@
 ## Summary
 
 A REST API using golang.
-This uses Postgres rather than SQL 5.7 
+This uses Postgres rather than SQL 5.7 as I had issues using sql 5.7 on my machine
 Please look at the sample api guide below to see how each endpoint works.
 
 ## Instructions to run:
