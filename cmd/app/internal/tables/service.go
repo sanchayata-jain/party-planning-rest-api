@@ -24,13 +24,18 @@ func (s Service) GetTables(ctx context.Context) ([]byte, error) {
 	return tables, nil
 }
 
-func (s Service) CreateTable(ctx context.Context, table models.Table) error {
+func (s Service) CreateTable(ctx context.Context, table models.Table) ([]byte, error) {
 	table.SeatsEmpty = table.Capacity
 	err := s.repository.CreateTable(ctx, table)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	b, err := s.repository.GetLastTableMade()
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
 
 func (s Service) CountNumberOfEmptySeats() (string, error) {

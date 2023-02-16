@@ -105,3 +105,55 @@ func (s *Suite) Test_repo_Create() {
 
 	require.NoError(s.T(), err)
 }
+
+func (s *Suite) Test_repo_get_last_table_made() {
+	var (
+		id         = 1
+		capacity   = 45
+		seatsEmpty = capacity
+	)
+	// s.mock.ExpectBegin()
+	s.mock.ExpectQuery(regexp.QuoteMeta(
+		`SELECT * FROM "tables" ORDER BY "tables"."id" DESC LIMIT 1`)).
+		WillReturnRows(sqlmock.NewRows([]string{"ID", "Capacity", "SeatsEmpty"}).
+			AddRow(id, capacity, seatsEmpty))
+	// s.mock.ExpectCommit()
+
+	_, err := s.repository.GetLastTableMade()
+	require.NoError(s.T(), err)
+
+}
+
+func (s *Suite) Test_repo_empty_seats() {
+	var (
+		seatsEmpty = 10
+	)
+	// s.mock.ExpectBegin()
+	s.mock.ExpectQuery(regexp.QuoteMeta(
+		`SELECT SUM(seats_empty) FROM "tables"`)).
+		WillReturnRows(sqlmock.NewRows([]string{"SeatsEmpty"}).
+			AddRow(seatsEmpty))
+	// s.mock.ExpectCommit()
+
+	emptySeats, err := s.repository.CountNumberOfEmptySeats()
+	require.NoError(s.T(), err)
+	assert.Equal(s.T(), 10, emptySeats)
+}
+
+// func (s *Suite) Test_repo_edit_empty_seats_after_guest_leaves() {
+// 	var (
+// 		capacity = 10
+// 		tableID = 1
+// 		db = s.DB
+// 	)
+// 	// s.mock.ExpectBegin()
+// 	s.mock.ExpectQuery(regexp.QuoteMeta(
+// 		`UPDATE "tables" SET "seats_empty"=$1 WHERE id = $2"`)).
+// 		WithArgs(capacity, tableID)
+// 		// WillReturnRows(sqlmock.NewRows([]string{"SeatsEmpty"}).
+// 		// 	AddRow(seatsEmpty))
+// 	// s.mock.ExpectCommit()
+
+// 	err := tables.EditEmptySeatsAfterGuestsLeave(capacity, tableID, db)
+// 	require.NoError(s.T(), err)
+// }

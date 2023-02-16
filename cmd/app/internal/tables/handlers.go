@@ -47,11 +47,12 @@ func (c Controller) Create() http.HandlerFunc {
 			return
 		}
 
-		err = c.service.CreateTable(r.Context(), table)
+		tableInfo, err := c.service.CreateTable(r.Context(), table)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		w.Write(tableInfo)
 		w.WriteHeader(http.StatusOK)
 	}
 }

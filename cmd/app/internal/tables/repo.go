@@ -45,12 +45,7 @@ func (r Repository) GetTables(ctx context.Context) ([]byte, error) {
 }
 
 func (r Repository) CreateTable(ctx context.Context, table models.Table) error {
-	createTable := &models.Table{}
-	tx := r.db.Select("Capacity", "SeatsEmpty").Create(&table)
-	if tx.Error != nil {
-		return tx.Error
-	}
-	_, err := json.Marshal(*createTable)
+	err := r.db.Select("Capacity", "SeatsEmpty").Create(&table).Error
 	if err != nil {
 		return err
 	}
@@ -58,9 +53,22 @@ func (r Repository) CreateTable(ctx context.Context, table models.Table) error {
 	return nil
 }
 
+func (r Repository) GetLastTableMade() ([]byte, error) {
+	createTable := &models.Table{}
+	err := r.db.Last(&createTable).Error
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(createTable)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
 func (r Repository) CountNumberOfEmptySeats() (int, error) {
 	var count int
-	tx := r.db.Model(&models.Table{}).Select("SUM(seats_empty)").Scan(&count)
+	tx := r.db.Debug().Model(&models.Table{}).Select("SUM(seats_empty)").Scan(&count)
 	if tx.Error != nil {
 		return 0, tx.Error
 	}
@@ -70,7 +78,7 @@ func (r Repository) CountNumberOfEmptySeats() (int, error) {
 
 func EditEmptySeatsAfterGuestsLeave(capacity int, tableID int, db *gorm.DB) error {
 	//using guests table number make empty seats equal capacity
-	tx := db.Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", capacity)
+	tx := db.Debug().Model(&models.Table{}).Select("seats_empty").Where("id = ?", tableID).Update("seats_empty", capacity)
 
 	return tx.Error
 }
