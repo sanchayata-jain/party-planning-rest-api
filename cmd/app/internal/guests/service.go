@@ -88,8 +88,6 @@ func (s Service) EditGuestsList(ctx context.Context, guest models.Guest) error {
 		// table they have requested is not big enough so turn away the group
 		return errors.New("the table you have requested does not have enough space for your new group size. goodbye")
 	}
-	// okay so capacity is fine .. lets update party size on guest list, and add arrival time
-	// let's also update seats_empty in tables table
 	guest.Arrived = true
 	arrivalTime := time.Now()
 	err = s.repository.EditGuestList(arrivalTime, guest)
