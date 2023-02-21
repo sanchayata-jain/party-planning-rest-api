@@ -47,7 +47,6 @@ func New() Server {
 	guestService := guests.NewService(guestRepo)
 	guestCtrl := guests.NewController(guestService)
 
-	r.MethodFunc(http.MethodGet, "/ping", handlerPing)
 	r.MethodFunc(http.MethodGet, "/get_tables", tableCtrl.ListTables())
 	r.MethodFunc(http.MethodPost, "/tables", tableCtrl.Create())
 	r.MethodFunc(http.MethodGet, "/seats_empty", tableCtrl.SumEmptySeats())
@@ -64,10 +63,6 @@ func New() Server {
 			Handler: r,
 		},
 	}
-}
-
-func handlerPing(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "pong\n")
 }
 
 func (s *server) ListenandServe() error {
